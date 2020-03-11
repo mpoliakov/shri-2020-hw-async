@@ -1,0 +1,45 @@
+Посмотрите код страницы и вывод в консоль браузера.
+
+<script src="shri-async-hw.js"></script>
+
+<script>
+    const {
+        AsyncArray
+    } = Homework;
+
+    const map = (array, fn, cb) => {
+        array.length((length) => {
+            const promises = [];
+
+            for(let i = 0; i < length; i++) {
+                promises.push(new Promise((resolve) => {
+                    array.get(i, (el) => {
+                        resolve(fn(el, i, array));
+                    });
+                }));
+            }
+
+            Promise.all(promises).then((result) => cb(new AsyncArray(result)));
+        });
+    };
+
+    const printDelimeter = () => console.log('------------------------------');
+
+    const arr1 = new AsyncArray([1, 2, 3, 4, 5]);
+    
+    console.log('Исходный массив:')
+    arr1.print();
+    printDelimeter();
+
+    map(arr1, (el) => (el * 2), (result) => {
+        console.log('Удвоение элемента (el*2):');
+        result.print();
+        printDelimeter();
+    });
+
+    map(arr1, (el, i) => Math.pow(el, i), (result) => {
+        console.log('Возведение элемента в степень его индекса (el^i):');
+        result.print();
+        printDelimeter();
+    });
+</script>
