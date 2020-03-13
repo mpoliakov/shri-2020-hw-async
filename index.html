@@ -7,20 +7,27 @@
         AsyncArray
     } = Homework;
 
+    const promisify = (fn) => (...args) => {
+        return new Promise((resolve) => {
+            fn.call(this, ...args, (result) => resolve(result));
+        });
+    };
+
     const map = (array, fn, cb) => {
-        array.length((length) => {
+        const lengthPromise = promisify(array.length);
+        const getPromise = promisify(array.get);
+        
+        lengthPromise().then((length) => {
+            // Принял, что запрет на использование массивов, мат. операций и операций сравнения относится только к операциям с данными.
             const promises = [];
 
             for(let i = 0; i < length; i++) {
-                promises.push(new Promise((resolve) => {
-                    array.get(i, (el) => {
-                        resolve(fn(el, i, array));
-                    });
-                }));
+                promises.push(getPromise(i).then((el) => fn(el, i, array)));
             }
 
-            Promise.all(promises).then((result) => cb(new AsyncArray(result)));
-        });
+            return Promise.all(promises);
+        })
+        .then((result) => cb(new AsyncArray(result)));
     };
 
     const printDelimeter = () => console.log('------------------------------');
